@@ -5,6 +5,6 @@ import { saveUserDetails } from '../controller/saveUserDetailController.js';  //
 
 const router = express.Router();
 
-router.post('/saveUserDetails', saveUserDetails); 
+router.post('/save-user-details', saveUserDetails); 
 
 export default router;
