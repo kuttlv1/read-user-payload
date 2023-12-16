@@ -1,27 +1,31 @@
 import aws from 'aws-sdk';
+//import getFileExtension from '../controller/fileTypeController.js';
 import { accessKey,secretAccessKey } from '../config/pass.js';
 
-// Configure AWS SDK with your credentials and region
 aws.config.update({
   accessKeyId: `${accessKey}`,
   secretAccessKey: `${secretAccessKey}`,
-  //region: 'Global',
+  //region: 'your-region',
 });
 
 const s3 = new aws.S3();
 
-export const uploadToS3 = async (fileName, buffer) => {
-  const params = {
-    Bucket: 'email-msg-attachment',
-    Key: fileName,
-    Body: buffer
-  };
-
-  try {
-    const s3Response = await s3.upload(params).promise();
-    return s3Response.Location; // URL of the uploaded file
-  } catch (error) {
-    console.error('Error uploading to S3:', error);
-    throw error;
-  }
+export const uploadToS3 = async (base64Data, buffer, fileName) => {
+    try {
+  
+        const params = {
+            Bucket: 'email-msg-attachment',
+            Key: fileName,
+            Body: buffer,
+            //ACL: 'public-read'
+        };
+        console.log('param-json is -', params);
+        const s3Response = await s3.upload(params).promise();
+        console.log('url is :', s3Response.Location);
+        return s3Response.Location;
+    } catch (error) {
+        console.error('Error uploading to S3:', error);
+        throw error;
+    }
 };
+
