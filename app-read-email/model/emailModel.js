@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
-
+// attachment schema
+const attachmentSchema = new mongoose.Schema({
+  fileName: String, // Name of the file
+  mimeType: String, // MIME type of the file
+  s3Url: String     // URL of the file stored in S3
+});
 // Message schema to include headers, body, and attachment
 const messageSchema = new mongoose.Schema({
   threadId: { type: String, required: true },
@@ -12,7 +17,7 @@ const messageSchema = new mongoose.Schema({
     'date-time': String
   },
   body: String,
-  attachment: [String] // Assuming attachments are represented as an array of strings (e.g., file paths or URLs)
+  attachment: [attachmentSchema] // To store binary data 
 });
 
 const payloadSchema = new mongoose.Schema({

@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import keys from './config/keys.js'; 
 import router from './routes/userDetailRoute.js';
+
 const app = express();
 
 // Connect to MongoDB

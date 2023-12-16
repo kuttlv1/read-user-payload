@@ -1,21 +1,57 @@
 // controllers/saveUserDetailController.js
-import PayloadModel from "../model/emailModel.js";  // Adjusted path and removed braces since default export
+import PayloadModel from "../model/emailModel.js";
+import { Binary } from 'mongodb'; // Import Binary class
+import { uploadToS3 } from '../utils/s3Upload.js'; // Utility for uploading to S3
+import getFileExtension from "./fileTypeController.js";
 
+// Function to validate base64 data
+const isValidBase64 = (data) => {
+  const base64Regex = /^[A-Za-z0-9+/]+[=]{0,2}$/;
+  return base64Regex.test(data);
+};
 
 export const saveUserDetails = async (req, res) => {
   try {
     const payloadData = req.body;
 
-    console.log(JSON.stringify({payloadData}))
+    console.log(JSON.stringify({payloadData}));
 
-    //Validate the payload
+     // Iterate through each message
+     for (const message of payloadData.messages) {
+      const attachments = message.attachments || [];
+      const attachmentUrls = [];
 
-    if (!payloadData || Object.keys(payloadData).length === 0) {
-      return res.status(400).json({ success: false, error: 'Payload is empty' });
+      // Process each attachment
+      for (const attachment of attachments) {
+        const buffer = Buffer.from(attachment.base64, 'base64');
+        const fileName = `${message.messageId}.${getFileExtension(attachment.base64)}`; // Determine file extension
+        const s3Url = await uploadToS3(fileName, buffer);
+        attachmentUrls.push({ fileName, mimeType: attachment.mimeType, s3Url });
+      }
+
+      // Update message with S3 URLs
+      message.attachments = attachmentUrls;
+    }
+
+    // // Assuming the attachment field is named 'base64Attachments' in the payload
+    // const base64Attachments = payloadData.messages.map(message => message.attachment);
+
+    // // Decode base64 attachments
+    // const binaryAttachments = base64Attachments.map(base64 => Buffer.from(base64, 'base64'));
+
+    // // Update 'attachment' field in each message to store binary data
+    // payloadData.messages.forEach((message, index) => {
+    //   message.attachment = binaryAttachments[index];
+    // });
+
+
+    // Validate the payload
+    if (!payloadData || !payloadData.messages || payloadData.messages.length === 0) {
+      return res.status(400).json({ success: false, error: 'Invalid payload structure' });
     }
 
     // Save payload to MongoDB
-const savedPayload = await PayloadModel.create(payloadData);
+    const savedPayload = await PayloadModel.create(payloadData);
 
     res.status(201).json({ success: true, data: savedPayload });
   } catch (error) {
