@@ -1,14 +1,13 @@
 // controllers/saveUserDetailController.js
 import PayloadModel from "../model/emailModel.js";
-import { Binary } from 'mongodb'; // Import Binary class
 import { uploadToS3 } from '../utils/s3Upload.js'; // Utility for uploading to S3
 import getFileExtension from "./fileTypeController.js";
 
-// Function to validate base64 data
-const isValidBase64 = (data) => {
-  const base64Regex = /^[A-Za-z0-9+/]+[=]{0,2}$/;
-  return base64Regex.test(data);
-};
+// // Function to validate base64 data
+// const isValidBase64 = (data) => {
+//   const base64Regex = /^[A-Za-z0-9+/]+[=]{0,2}$/;
+//   return base64Regex.test(data);
+// };
 
 export const saveUserDetails = async (req, res) => {
   try {
@@ -25,7 +24,7 @@ export const saveUserDetails = async (req, res) => {
       for (const attachment of attachments) {
         const buffer = Buffer.from(attachment.base64, 'base64');
         const fileName = `${message.messageId}.${getFileExtension(attachment.base64)}`; // Determine file extension
-        const s3Url = await uploadToS3(fileName, buffer);
+        const s3Url = await uploadAttachmentToS3(fileName, buffer);
         attachmentUrls.push({ fileName, mimeType: attachment.mimeType, s3Url });
       }
 
@@ -64,3 +63,13 @@ export const saveUserDetails = async (req, res) => {
     }
   }
 };
+// Function to upload attachment to S3
+const uploadAttachmentToS3 = async (fileName, buffer) => {
+  try {
+    const s3Url = await uploadToS3(fileName, buffer);
+    return s3Url;
+  } catch (error) {
+    console.error('Error uploading attachment to S3:', error);
+    throw error;
+  }
+}

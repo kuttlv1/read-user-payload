@@ -1,11 +1,19 @@
 import aws from 'aws-sdk';
+import { accessKey,secretAccessKey } from '../config/pass.js';
+
+// Configure AWS SDK with your credentials and region
+aws.config.update({
+  accessKeyId: `${accessKey}`,
+  secretAccessKey: `${secretAccessKey}`,
+  //region: 'Global',
+});
 
 const s3 = new aws.S3();
 
 export const uploadToS3 = async (fileName, buffer) => {
   const params = {
     Bucket: 'email-msg-attachment',
-    Key:fileName,
+    Key: fileName,
     Body: buffer
   };
 

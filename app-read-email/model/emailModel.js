@@ -17,7 +17,7 @@ const messageSchema = new mongoose.Schema({
     'date-time': String
   },
   body: String,
-  attachment: [attachmentSchema] // To store binary data 
+  attachments: [attachmentSchema] // To store binary data 
 });
 
 const payloadSchema = new mongoose.Schema({
@@ -26,5 +26,6 @@ const payloadSchema = new mongoose.Schema({
 });
 
 const PayloadModel = mongoose.model('Payload', payloadSchema);
+
 
 export default PayloadModel;
