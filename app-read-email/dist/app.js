@@ -9,8 +9,8 @@ mongoose.connection.on('connected', () => {
     console.log('Connected to MongoDB');
 });
 // parsing JSON in the request body
-app.use(json({ limit: '50mb' }));
-app.use(urlencoded({ limit: '50mb', extended: true }));
+app.use(json({ limit: '100mb' }));
+app.use(urlencoded({ limit: '100mb', extended: true }));
 app.get('/health-check', (req, res) => { res.json('Hello world'); });
 // userRouter for handling user-related routes
 app.use('/api', router);

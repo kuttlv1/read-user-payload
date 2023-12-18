@@ -12,8 +12,8 @@ mongoose.connection.on('connected', () => {
 });
 
 // parsing JSON in the request body
-app.use(json({ limit: '50mb' }));
-app.use(urlencoded({ limit: '50mb', extended: true }));
+app.use(json({ limit: '100mb' }));
+app.use(urlencoded({ limit: '100mb', extended: true }));
 
 app.get('/health-check', (req:Request, res:Response) => {res.json('Hello world')})
 
