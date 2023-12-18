@@ -90,13 +90,34 @@
 // };
 
 // controllers/saveUserDetailController.js
+import { Request, Response } from 'express';
 import PayloadModel from "../model/emailModel.js";
 import { uploadToS3 } from '../utils/s3Upload.js'; // Utility for uploading to S3
 import getFileExtension from "./fileTypeController.js";
 
-export const saveUserDetails = async (req, res) => {
+// Define interfaces to represent the structure of the data used in the function
+// Naming Convention : starts with Capital Letters
+
+interface Attachment {
+  base64:string;
+  mimeType:string;
+}
+
+interface Message {
+  messageId:string;
+  attachments?: Attachment[];
+}
+
+interface payloadData {
+  messages : Message[];
+}
+
+export const saveUserDetails = async (req:Request, res:Response) : Promise<void> => {
   try {
-    const payloadData = req.body;
+
+    // Extract the payload data from the request body
+
+    const payloadData : payloadData = req.body;
     console.log(JSON.stringify({payloadData}));
 
     // Validate the payload
@@ -114,14 +135,21 @@ export const saveUserDetails = async (req, res) => {
         const buffer = Buffer.from(attachment.base64, 'base64');
         console.log('Attachment:', attachment);
 
-        // Await the file extension
+        // Await the file extension using the provided utility function
         const fileExtension = await getFileExtension(attachment.base64);
         if (!fileExtension) {
           console.error('Unable to determine file extension for attachment:', attachment);
           continue; // Skip this attachment if the file extension can't be determined
         }
+
+        // Create a file name based on the message ID and file extension
+
         const fileName = `${message.messageId}.${fileExtension}`;
+
         //const s3Url = await uploadToS3(fileName, buffer);
+
+        // Upload the attachment to S3 and get the resulting URL
+
         const s3Url = await uploadToS3(attachment.base64, buffer, fileName);
         attachmentUrls.push({ fileName, mimeType: attachment.mimeType, s3Url });
       }
@@ -135,7 +163,15 @@ export const saveUserDetails = async (req, res) => {
     res.status(201).json({ success: true, data: savedPayload });
 
   } catch (error) {
-    console.error('Error in saveUserDetails:', error);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
+
+    //duplicate key violation on messageID field
+
+    if(error.code===11000 && error.keyPattern && error.keyPattern['messages.messageId']) {
+      res.status(400).json({success:false, error:'Duplicate messageID' });
+    }
+    else{
+      console.error(error);
+      res.status({sucess:false , error:`Internal Server Error : ${error}`})
+    }
   }
 };

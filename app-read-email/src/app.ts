@@ -1,9 +1,9 @@
-import express from 'express';
+import express , { Application, Request, Response,json,urlencoded } from 'express';
 import mongoose from 'mongoose';
 import keys from './config/keys.js'; 
 import router from './routes/userDetailRoute.js';
 
-const app = express();
+const app : Application = express();
 
 // Connect to MongoDB
 mongoose.connect(keys.mongodb.dbURI);
@@ -12,9 +12,10 @@ mongoose.connection.on('connected', () => {
 });
 
 // parsing JSON in the request body
-app.use(express.json());
+app.use(json({ limit: '50mb' }));
+app.use(urlencoded({ limit: '50mb', extended: true }));
 
-app.get('/health-check', (req, res) => {res.json('Hello world')})
+app.get('/health-check', (req:Request, res:Response) => {res.json('Hello world')})
 
 // userRouter for handling user-related routes
 app.use('/api', router);

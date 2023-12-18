@@ -1,4 +1,34 @@
-import mongoose from 'mongoose';
+import mongoose, {Document, Schema } from 'mongoose';
+
+interface Attachment {
+  fileName: string;
+  mimeType: string;
+  s3Url: string;
+}
+
+interface Headers {
+  Subject?: string;
+  deviceId?: string;
+  From?: string;
+  To?: string;
+  'date-time'?: string;
+}
+
+interface Message {
+  threadId: string;
+  messageId: string;
+  headers: Headers;
+  body: string;
+  attachments?: Attachment[];
+}
+
+interface Payload {
+  messages: Message[];
+}
+
+interface PayloadDocument extends Payload, Document {}
+
+
 // attachment schema
 const attachmentSchema = new mongoose.Schema({
   fileName: String, // Name of the file
@@ -25,7 +55,7 @@ const payloadSchema = new mongoose.Schema({
   
 });
 
-const PayloadModel = mongoose.model('Payload', payloadSchema);
+const PayloadModel = mongoose.model<PayloadDocument>('Payload', payloadSchema);
 
 
 export default PayloadModel;

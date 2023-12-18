@@ -1,6 +1,7 @@
-import Sms from "../model/sms-model.js";
+import {Request ,Response } from 'express';
+import SmsModel, { SmsDocument }from "../model/sms-model.js";
 
-export const createSms = async (req, res) => {
+export const createSms = async (req:Request, res:Response) => {
     try {
       const { address, body, thread_id, date, dateSent } = req.body;
   
@@ -16,7 +17,7 @@ export const createSms = async (req, res) => {
 
   
       // Create a new instance of the Sms model with the provided payload
-      const newSms = new Sms({
+      const newSms : SmsDocument = new SmsModel({
         address,
         body,
         thread_id,
@@ -25,7 +26,7 @@ export const createSms = async (req, res) => {
       });
   
       // Save the new SMS to the MongoDB collection
-      const savedSms = await newSms.save();
+      const savedSms : SmsDocument = await newSms.save();
   
       // Respond with the saved SMS
       res.status(201).json(savedSms);
